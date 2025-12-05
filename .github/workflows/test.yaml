@@ -13,8 +13,7 @@ jobs:
     strategy:
       matrix:
         features:
-          - color
-          - hello
+          - clickhouse-local    # ← Changed from 'color' and 'hello'
         baseImage:
           - debian:latest
           - ubuntu:latest
@@ -34,8 +33,7 @@ jobs:
     strategy:
       matrix:
         features:
-          - color
-          - hello
+          - clickhouse-local    # ← Changed from 'color' and 'hello'
     steps:
       - uses: actions/checkout@v4
 

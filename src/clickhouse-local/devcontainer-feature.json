@@ -1,0 +1,20 @@
+{
+    "id": "clickhouse-local",
+    "version": "1.0.0",
+    "name": "ClickHouse Local CLI",
+    "description": "Installs ClickHouse local CLI for SQL queries on local files",
+    "documentationURL": "https://github.com/YOUR-USERNAME/devcontainer-features/tree/main/src/clickhouse-local",
+    "options": {
+        "version": {
+            "type": "string",
+            "default": "latest",
+            "description": "ClickHouse version to install"
+        },
+        "installMethod": {
+            "type": "string",
+            "enum": ["quick", "apt"],
+            "default": "quick",
+            "description": "Installation method: 'quick' (binary) or 'apt' (package manager)"
+        }
+    }
+}

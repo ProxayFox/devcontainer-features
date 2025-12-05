@@ -1,10 +1,14 @@
 name: "Release dev container features & Generate Documentation"
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**/devcontainer-feature.json'  # Triggers on any devcontainer-feature.json change
 
 jobs:
   deploy:
-    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write

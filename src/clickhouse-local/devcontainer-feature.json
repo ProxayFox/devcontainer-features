@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "name": "ClickHouse Local CLI",
     "description": "Installs ClickHouse local CLI for SQL queries on local files",
-    "documentationURL": "https://github.com/YOUR-USERNAME/devcontainer-features/tree/main/src/clickhouse-local",
+    "documentationURL": "https://github.com/ProxayFox/devcontainer-features/tree/main/src/clickhouse-local",
     "options": {
         "version": {
             "type": "string",

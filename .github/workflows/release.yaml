@@ -30,6 +30,7 @@ jobs:
       - name: Create Pull Request for Documentation
         uses: peter-evans/create-pull-request@v7
         with:
+          token: ${{ secrets.PAT_TOKEN }}
           commit-message: 'Automated documentation update [skip ci]'
           branch: automated-documentation-update-${{ github.run_id }}
           title: 'Automated documentation update'

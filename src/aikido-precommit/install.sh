@@ -27,6 +27,9 @@ fetch_latest_version() {
             echo "$extracted_version"
             return 0
         fi
+        echo "Warning: Could not extract version from upstream script, using fallback version $FALLBACK_VERSION" >&2
+    else
+        echo "Warning: Failed to fetch upstream version (network or connection timeout), using fallback version $FALLBACK_VERSION" >&2
     fi
 
     # Fallback if upstream fetch fails

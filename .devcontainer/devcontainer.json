@@ -16,9 +16,12 @@
     "remoteUser": "node",
     "updateContentCommand": "npm install -g @devcontainers/cli",
 
-    // Bind mount the host's /tmp/devcontainercli to the container's /tmp/devcontainercli`
     "mounts": [
-        "source=/tmp,target=/tmp,type=bind"
+        // Bind mount the host's /tmp/devcontainercli to the container's /tmp/devcontainercli`
+        "source=/tmp,target=/tmp,type=bind",
+
+        // Bind mount the host's SSH config to the container's SSH config
+        "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
     ],
 
     // Add custom VS Code settings and extensions

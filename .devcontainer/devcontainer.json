@@ -1,11 +1,25 @@
 {
-    "image": "mcr.microsoft.com/devcontainers/javascript-node:1-20-bookworm",
+    "image": "mcr.microsoft.com/devcontainers/typescript-node:4-24-bookworm",
     "features": {
-        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
-        "ghcr.io/devcontainers/features/github-cli:1": {}
+        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+            "moby": true,
+            "installDockerBuildx": true,
+            "installDockerComposeSwitch": true,
+            "version": "latest",
+            "dockerDashComposeVersion": "v2"
+        },
+        "ghcr.io/devcontainers/features/github-cli:1": {
+            "installDirectlyFromGitHubRelease": true,
+            "version": "latest"
+        }
     },
     "remoteUser": "node",
     "updateContentCommand": "npm install -g @devcontainers/cli",
+
+    // Bind mount the host's /tmp/devcontainercli to the container's /tmp/devcontainercli`
+    "mounts": [
+        "source=/tmp,target=/tmp,type=bind"
+    ],
 
     // Add custom VS Code settings and extensions
     "customizations": {
@@ -22,7 +36,9 @@
             },
             "extensions": [
                 "mads-hartmann.bash-ide-vscode",
-                "DavidAnson.vscode-markdownlint"
+                "ms-azuretools.vscode-containers",
+                "DavidAnson.vscode-markdownlint",
+                "tehnix.vscode-tidymarkdown"
             ]
         }
     }

@@ -1,5 +1,13 @@
 {
     "image": "mcr.microsoft.com/devcontainers/javascript-node:1-20-bookworm",
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    },
+    "remoteUser": "node",
+    "updateContentCommand": "npm install -g @devcontainers/cli",
+
+    // Add custom VS Code settings and extensions
     "customizations": {
         "vscode": {
             "settings": {
@@ -13,14 +21,9 @@
                 ]
             },
             "extensions": [
-                "mads-hartmann.bash-ide-vscode"
+                "mads-hartmann.bash-ide-vscode",
+                "DavidAnson.vscode-markdownlint"
             ]
         }
-    },
-    "features": {
-        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
-        "ghcr.io/devcontainers/features/github-cli:1": {}
-    },
-    "remoteUser": "node",
-    "updateContentCommand": "npm install -g @devcontainers/cli"
+    }
 }

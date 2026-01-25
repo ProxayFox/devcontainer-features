@@ -11,6 +11,7 @@ This repository contains a collection of dev container Features designed to stre
 Installs the ClickHouse Local CLI, enabling you to run SQL queries on local files without setting up a full ClickHouse server. Perfect for data analysis, ETL development, and testing.
 
 **Features:**
+
 - Run SQL queries on CSV, TSV, JSON, Parquet, and other file formats
 - No server setup required - works entirely locally
 - Multiple installation methods (quick binary install or APT package manager)
@@ -31,6 +32,7 @@ Installs the ClickHouse Local CLI, enabling you to run SQL queries on local file
 ```
 
 **Options:**
+
 - `version` (string): ClickHouse version to install. Default: `"latest"`
 - `installMethod` (string): Installation method - `"quick"` (binary) or `"apt"` (package manager). Default: `"quick"`
 
@@ -48,7 +50,7 @@ $ clickhouse-local --query "SELECT user_id, COUNT(*) as visits FROM file('logs.j
 
 This repository follows the standard dev container Features layout:
 
-```
+```text
 ├── src
 │   └── clickhouse-local
 │       ├── devcontainer-feature.json
@@ -62,6 +64,7 @@ This repository follows the standard dev container Features layout:
 ```
 
 Each Feature has its own subdirectory under `src/` containing:
+
 - `devcontainer-feature.json` - Feature metadata and option definitions
 - `install.sh` - Installation script executed during container build
 
@@ -114,11 +117,12 @@ Features are individually versioned using semantic versioning (semver) in their 
 
 Features in this repository are automatically published to GitHub Container Registry (GHCR) via GitHub Actions. The workflow is triggered on push to the main branch and publishes each Feature with the namespace:
 
-```
+```text
 ghcr.io/proxayfox/devcontainer-features/<feature-name>:<version>
 ```
 
 For example:
+
 - `ghcr.io/proxayfox/devcontainer-features/clickhouse-local:1`
 
 ### Making Features Public

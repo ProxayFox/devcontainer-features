@@ -117,11 +117,13 @@ if [ "$SETUP_GLOBAL_HOOKS" = "true" ]; then
     # Define the Aikido hook snippet
     AIKIDO_HOOK_START="# --- Aikido local scanner ---"
     AIKIDO_HOOK_END="# --- End Aikido local scanner ---"
-    AIKIDO_HOOK_SNIPPET="${AIKIDO_HOOK_START}
-[ -x \"${INSTALL_DIR}/${BINARY_NAME}\" ] || { echo \"Aikido local scanner not found at ${INSTALL_DIR}/${BINARY_NAME}\"; exit 1; }
-REPO_ROOT=\"\$(git rev-parse --show-toplevel)\"
-\"${INSTALL_DIR}/${BINARY_NAME}\" pre-commit-scan \"\$REPO_ROOT\"
-${AIKIDO_HOOK_END}"
+    AIKIDO_HOOK_SNIPPET="""
+        ${AIKIDO_HOOK_START}
+        [ -x \"${INSTALL_DIR}/${BINARY_NAME}\" ] || { echo \"Aikido local scanner not found at ${INSTALL_DIR}/${BINARY_NAME}\"; exit 1; }
+        REPO_ROOT=\"\$(git rev-parse --show-toplevel)\"
+        \"${INSTALL_DIR}/${BINARY_NAME}\" pre-commit-scan \"\$REPO_ROOT\"
+        ${AIKIDO_HOOK_END}
+    """
 
     # Check if hook file exists and if Aikido snippet is already present
     if [ -f "$PRECOMMIT_HOOK" ]; then

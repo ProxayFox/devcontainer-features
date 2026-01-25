@@ -3,8 +3,46 @@
 set -e
 
 # Get options from environment (feature options are uppercase)
-VERSION="${VERSION:-"v1.0.116"}"
+VERSION="${VERSION:-"latest"}"
 SETUP_GLOBAL_HOOKS="${SETUPGLOBALHOOKS:-"true"}"
+
+# Fallback version used when "latest" cannot be fetched from upstream
+# This is automatically updated by the aikido-version-check.yml workflow
+FALLBACK_VERSION="v1.0.116"
+
+# Upstream script URL for fetching latest version
+AIKIDO_UPSTREAM_SCRIPT="https://raw.githubusercontent.com/AikidoSec/pre-commit/main/installation-samples/install-global/install-aikido-hook.sh"
+
+# Function to fetch the latest version from Aikido's upstream script
+fetch_latest_version() {
+    local upstream_script
+    local extracted_version
+
+    # Attempt to fetch the upstream install script
+    if upstream_script=$(curl -fsSL --connect-timeout 10 "$AIKIDO_UPSTREAM_SCRIPT" 2>/dev/null); then
+        # Extract VERSION="vX.X.X" from the script
+        extracted_version=$(echo "$upstream_script" | grep -oP '^VERSION="\K[^"]+' | head -1)
+
+        if [ -n "$extracted_version" ]; then
+            echo "$extracted_version"
+            return 0
+        fi
+        echo "Warning: Could not extract version from upstream script, using fallback version $FALLBACK_VERSION" >&2
+    else
+        echo "Warning: Failed to fetch upstream version (network or connection timeout), using fallback version $FALLBACK_VERSION" >&2
+    fi
+
+    # Fallback if upstream fetch fails
+    echo "$FALLBACK_VERSION"
+    return 0
+}
+
+# Resolve version
+if [ "$VERSION" = "latest" ]; then
+    echo "Fetching latest version from Aikido upstream..."
+    VERSION=$(fetch_latest_version)
+    echo "Resolved version: $VERSION"
+fi
 
 # Normalize version format (ensure it starts with 'v')
 if [[ ! "$VERSION" =~ ^v ]]; then

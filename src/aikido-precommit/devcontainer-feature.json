@@ -7,8 +7,8 @@
     "options": {
         "version": {
             "type": "string",
-            "default": "v1.0.116",
-            "description": "Version of the aikido-local-scanner to install"
+            "default": "latest",
+            "description": "Version of the aikido-local-scanner to install (use 'latest' for auto-detection)"
         },
         "setupGlobalHooks": {
             "type": "boolean",

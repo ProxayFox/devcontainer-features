@@ -1,0 +1,102 @@
+name: Check Aikido Scanner Version
+
+on:
+  schedule:
+    # Run weekly on Mondays at 9:00 UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch upstream Aikido version
+        id: upstream
+        run: |
+          # Fetch the official Aikido install script
+          UPSTREAM_SCRIPT=$(curl -fsSL "https://raw.githubusercontent.com/AikidoSec/pre-commit/main/installation-samples/install-global/install-aikido-hook.sh")
+          
+          # Extract VERSION from the script (format: VERSION="v1.0.116")
+          UPSTREAM_VERSION=$(echo "$UPSTREAM_SCRIPT" | grep -oP '^VERSION="\K[^"]+' | head -1)
+          
+          if [ -z "$UPSTREAM_VERSION" ]; then
+            echo "Error: Could not extract version from upstream script"
+            exit 1
+          fi
+          
+          echo "upstream_version=$UPSTREAM_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Found upstream version: $UPSTREAM_VERSION"
+
+      - name: Get current pinned version
+        id: current
+        run: |
+          # Extract the fallback version from install.sh
+          CURRENT_VERSION=$(grep -oP 'FALLBACK_VERSION="\K[^"]+' src/aikido-precommit/install.sh | head -1)
+          
+          if [ -z "$CURRENT_VERSION" ]; then
+            echo "Error: Could not extract FALLBACK_VERSION from install.sh"
+            exit 1
+          fi
+          
+          echo "current_version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Current pinned version: $CURRENT_VERSION"
+
+      - name: Compare versions
+        id: compare
+        run: |
+          UPSTREAM="${{ steps.upstream.outputs.upstream_version }}"
+          CURRENT="${{ steps.current.outputs.current_version }}"
+          
+          if [ "$UPSTREAM" = "$CURRENT" ]; then
+            echo "Versions match ($CURRENT), no update needed"
+            echo "needs_update=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Version mismatch: upstream=$UPSTREAM, current=$CURRENT"
+            echo "needs_update=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update version in install.sh
+        if: steps.compare.outputs.needs_update == 'true'
+        run: |
+          UPSTREAM="${{ steps.upstream.outputs.upstream_version }}"
+          CURRENT="${{ steps.current.outputs.current_version }}"
+          
+          # Update FALLBACK_VERSION in install.sh
+          sed -i "s/FALLBACK_VERSION=\"${CURRENT}\"/FALLBACK_VERSION=\"${UPSTREAM}\"/" src/aikido-precommit/install.sh
+          
+          echo "Updated FALLBACK_VERSION from $CURRENT to $UPSTREAM"
+
+      - name: Create Pull Request
+        if: steps.compare.outputs.needs_update == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(aikido-precommit): update fallback version to ${{ steps.upstream.outputs.upstream_version }}"
+          title: "chore(aikido-precommit): update fallback version to ${{ steps.upstream.outputs.upstream_version }}"
+          body: |
+            ## Automated Version Update
+            
+            This PR updates the Aikido local scanner fallback version from `${{ steps.current.outputs.current_version }}` to `${{ steps.upstream.outputs.upstream_version }}`.
+            
+            ### Source
+            Version extracted from [Aikido's official install script](https://github.com/AikidoSec/pre-commit/blob/main/installation-samples/install-global/install-aikido-hook.sh).
+            
+            ### Notes
+            - Users with `version: "latest"` (default) will automatically get the new version
+            - Users with explicit version pins are unaffected
+            - The fallback version is used when the upstream script cannot be fetched
+            
+            ---
+            *This PR was automatically created by the [aikido-version-check](.github/workflows/aikido-version-check.yml) workflow.*
+          branch: chore/aikido-version-update
+          delete-branch: true
+          labels: |
+            dependencies
+            automated

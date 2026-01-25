@@ -46,19 +46,51 @@ $ clickhouse-local --query "SELECT * FROM file('data.csv', 'CSV') LIMIT 10"
 $ clickhouse-local --query "SELECT user_id, COUNT(*) as visits FROM file('logs.json', 'JSONEachRow') GROUP BY user_id"
 ```
 
+### `lazydocker`
+
+Provides the Lazydocker TUI for managing Docker containers and docker-compose workloads from the terminal.
+
+**Features:**
+
+- Single-pane view of containers, images, volumes, and compose services
+- Interactive logs and shell access
+- Lightweight install with configurable version
+
+**Usage:**
+
+```jsonc
+{
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+        "ghcr.io/proxayfox/devcontainer-features/lazydocker:1": {
+            "version": "0.24.2"
+        }
+    }
+}
+```
+
+**Options:**
+
+- `version` (string): Lazydocker version to install. Default: `"0.24.2"`
+
 ## Repository Structure
 
 This repository follows the standard dev container Features layout:
 
 ```text
 ├── src
-│   └── clickhouse-local
+│   ├── clickhouse-local
+│   │   ├── devcontainer-feature.json
+│   │   └── install.sh
+│   └── lazydocker
 │       ├── devcontainer-feature.json
 │       └── install.sh
 ├── test
 │   ├── _global
 │   │   └── common-utils.sh
-│   └── clickhouse-local
+│   ├── clickhouse-local
+│   │   └── test.sh
+│   └── lazydocker
 │       └── test.sh
 └── README.md
 ```

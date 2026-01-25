@@ -1,4 +1,3 @@
-
 # lazydocker (lazydocker)
 
 A simple terminal UI for both docker and docker-compose
@@ -13,12 +12,10 @@ A simple terminal UI for both docker and docker-compose
 
 ## Options
 
-| Options Id | Description | Type | Default Value |
-|-----|-----|-----|-----|
-| version | Version of lazydocker to install | string | 0.24.2 |
+Options Id | Description                      | Type   | Default Value
+---------- | -------------------------------- | ------ | -------------
+version    | Version of lazydocker to install | string | 0.24.2
 
+--------------------------------------------------------------------------------
 
-
----
-
-_Note: This file was auto-generated from the [devcontainer-feature.json](https://github.com/ProxayFox/devcontainer-features/blob/main/src/lazydocker/devcontainer-feature.json).  Add additional notes to a `NOTES.md`._
+_Note: This file was auto-generated from the [devcontainer-feature.json](https://github.com/ProxayFox/devcontainer-features/blob/main/src/lazydocker/devcontainer-feature.json). Add additional notes to a `NOTES.md`._

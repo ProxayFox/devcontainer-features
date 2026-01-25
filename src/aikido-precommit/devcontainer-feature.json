@@ -1,0 +1,23 @@
+{
+    "name": "Aikido Secrets Pre-commit Hook",
+    "id": "aikido-precommit",
+    "version": "1.0.0",
+    "description": "Installs AikidoSec's pre-commit hook for scanning secrets, passwords, and API keys before commits",
+    "documentationURL": "https://github.com/AikidoSec/pre-commit",
+    "options": {
+        "version": {
+            "type": "string",
+            "default": "v1.0.116",
+            "description": "Version of the aikido-local-scanner to install"
+        },
+        "setupGlobalHooks": {
+            "type": "boolean",
+            "default": true,
+            "description": "Configure git global hooks path (set to false for download-only)"
+        }
+    },
+    "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils",
+        "ghcr.io/devcontainers/features/git"
+    ]
+}

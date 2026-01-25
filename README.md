@@ -73,12 +73,52 @@ Provides the Lazydocker TUI for managing Docker containers and docker-compose wo
 
 - `version` (string): Lazydocker version to install. Default: `"0.24.2"`
 
+### `aikido-precommit`
+
+Installs [AikidoSec's pre-commit hook](https://github.com/AikidoSec/pre-commit) for scanning secrets, passwords, and API keys before commits. Prevents accidentally committing sensitive information to repositories.
+
+**Features:**
+
+- Scans staged files for secrets, API keys, passwords, and sensitive data
+- Runs automatically on `git commit` when global hooks are configured
+- Supports Linux (x86_64, ARM64) and macOS (ARM64)
+- Lightweight binary with no runtime dependencies
+
+**Usage:**
+
+```jsonc
+{
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+        "ghcr.io/proxayfox/devcontainer-features/aikido-precommit:1": {}
+    }
+}
+```
+
+**Options:**
+
+- `version` (string): Version of the aikido-local-scanner to install. Default: `"v1.0.116"`
+- `setupGlobalHooks` (boolean): Configure git global hooks path. Default: `true`
+
+**Example:**
+
+```bash
+# Manual scan of a repository
+$ aikido-local-scanner pre-commit-scan /path/to/repo
+
+# Scan current repository
+$ aikido-local-scanner pre-commit-scan "$(git rev-parse --show-toplevel)"
+```
+
 ## Repository Structure
 
 This repository follows the standard dev container Features layout:
 
 ```text
 ├── src
+│   ├── aikido-precommit
+│   │   ├── devcontainer-feature.json
+│   │   └── install.sh
 │   ├── clickhouse-local
 │   │   ├── devcontainer-feature.json
 │   │   └── install.sh
@@ -88,6 +128,8 @@ This repository follows the standard dev container Features layout:
 ├── test
 │   ├── _global
 │   │   └── common-utils.sh
+│   ├── aikido-precommit
+│   │   └── test.sh
 │   ├── clickhouse-local
 │   │   └── test.sh
 │   └── lazydocker

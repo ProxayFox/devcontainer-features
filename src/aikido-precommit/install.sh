@@ -8,7 +8,7 @@ SETUP_GLOBAL_HOOKS="${SETUPGLOBALHOOKS:-"true"}"
 
 # Fallback version used when "latest" cannot be fetched from upstream
 # This is automatically updated by the aikido-version-check.yml workflow
-FALLBACK_VERSION="v1.0.116"
+FALLBACK_VERSION="v1.0.129"
 
 # Upstream script URL for fetching latest version
 AIKIDO_UPSTREAM_SCRIPT="https://raw.githubusercontent.com/AikidoSec/pre-commit/main/installation-samples/install-global/install-aikido-hook.sh"

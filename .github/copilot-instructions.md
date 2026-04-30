@@ -1,12 +1,66 @@
 # Copilot Instructions
 
-- **Repo purpose**: Single dev container Feature set published to GHCR; see available Features in [README.md](README.md). Each Feature follows containers.dev spec with metadata, installer, and tests under its own folder.
-- **Layout**: One Feature per subfolder in `src/<feature>` with `devcontainer-feature.json`, `install.sh`, and a matching test in `test/<feature>/test.sh`. Shared test helpers live in [test/_global/common-utils.sh](test/_global/common-utils.sh).
-- **Option → env mapping**: Feature options become uppercase env vars (e.g., `version` -> `VERSION`, `installMethod` -> `INSTALLMETHOD`). Default values live in each `devcontainer-feature.json`.
-- **ClickHouse Local**: Defaults `version=latest`, `installMethod=quick` ([src/clickhouse-local/devcontainer-feature.json](src/clickhouse-local/devcontainer-feature.json)). Installer supports `quick` binary or `apt` path, adds key/repo when apt is chosen, creates `clickhouse-local`/`clickhouse`/`clickhouse-client` symlinks, and verifies with `clickhouse-local --version` ([src/clickhouse-local/install.sh](src/clickhouse-local/install.sh)). Tests run a `SELECT 1` sanity query ([test/clickhouse-local/test.sh](test/clickhouse-local/test.sh)).
-- **Lazydocker**: Option `version` default `0.24.2` ([src/lazydocker/devcontainer-feature.json](src/lazydocker/devcontainer-feature.json)). Installer maps `uname -m` to GitHub release arch, downloads the tarball, validates gzip via `file`, installs to `/usr/local/bin`, and verifies `lazydocker --version` ([src/lazydocker/install.sh](src/lazydocker/install.sh)). Tests assert presence, version output, and executable bit ([test/lazydocker/test.sh](test/lazydocker/test.sh)).
-- **Aikido pre-commit**: Options `version` (default `v1.0.116`) and `setupGlobalHooks` (default true) ([src/aikido-precommit/devcontainer-feature.json](src/aikido-precommit/devcontainer-feature.json)). Installer normalizes version prefix, downloads platform/arch-specific zip, installs `aikido-local-scanner`, and optionally wires global git `core.hooksPath` with a pre-commit snippet guarding missing binaries ([src/aikido-precommit/install.sh](src/aikido-precommit/install.sh)). Tests validate binary availability, hook configuration when enabled, and exercise `pre-commit-scan` in a temp repo ([test/aikido-precommit/test.sh](test/aikido-precommit/test.sh)).
-- **Testing workflow**: Run the full suite with `devcontainer features test` or individual scripts via `bash test/<feature>/test.sh` inside a built dev container. Tests assume the feature binaries are already installed in PATH and use `set -e` for fast failures.
-- **Installer conventions**: Keep installers non-interactive (`DEBIAN_FRONTEND=noninteractive`), install minimal prerequisites, and clean temp dirs/archives. Prefer `install -m 755` for binaries and confirm installs with a command run at the end.
-- **Adding/updating features**: Mirror existing folder pattern, expose options in `devcontainer-feature.json`, consume them via uppercase env vars in `install.sh`, add verification to the installer, and provide a sanity test in `test/<feature>/test.sh`. Update [README.md](README.md) with a short blurb and usage snippet.
-- **Publishing/versioning**: Each feature is semvered in its `devcontainer-feature.json`; images publish to `ghcr.io/proxayfox/devcontainer-features/<feature>:<version>`. Keep metadata version in sync with published tags.
+## Repo Purpose
+
+Single dev container Feature set published to GHCR. Each Feature follows the [containers.dev spec](https://containers.dev/implementors/features/) with metadata, installer, and tests under its own folder. See <README.md> for usage snippets.
+
+## Layout
+
+```text
+src/<feature>/devcontainer-feature.json   # metadata + options (source of truth for defaults)
+src/<feature>/install.sh                  # installer script
+test/<feature>/test.sh                    # sanity tests (run inside a built container)
+test/<feature>/scenarios.json             # optional extra test scenarios
+test/_global/common-utils.sh              # shared test helpers (check/reportResults)
+```
+
+## Commands
+
+Task                   | Command
+---------------------- | ------------------------------------------------------------------------------
+Run all feature tests  | `devcontainer features test`
+Test one feature       | `devcontainer features test -f <feature>`
+Test specific scenario | `devcontainer features test -f <feature> --skip-scenarios --filter <scenario>`
+Validate metadata      | `devcontainer features info manifest src/<feature>`
+
+## CI Workflows (`.github/workflows/`)
+
+- **[test.yaml](.github/workflows/test.yaml)** -- runs on push to `main` and PRs. Currently only matrices `clickhouse-local`; lazydocker and aikido-precommit are not in CI yet.
+- **[validate.yml](.github/workflows/validate.yml)** -- validates all `devcontainer-feature.json` files on PRs.
+- **[release.yaml](.github/workflows/release.yaml)** -- publishes features to GHCR on push to `main` when any `devcontainer-feature.json` changes.
+- **aikido-version-check.yml / lazydocker-version-check.yml** -- weekly cron jobs that compare upstream versions and open update PRs automatically.
+
+## Option → Env Mapping
+
+Feature options become uppercase env vars in `install.sh` (e.g., `version` → `VERSION`, `installMethod` → `INSTALLMETHOD`). Default values live in each `devcontainer-feature.json`.
+
+## Installer Conventions
+
+- Non-interactive: set `DEBIAN_FRONTEND=noninteractive`.
+- Install minimal prerequisites; clean temp dirs/archives (use `trap … EXIT`).
+- Use `install -m 755` for binaries into `/usr/local/bin`.
+- Always verify the install at the end (e.g., `<binary> --version`).
+- For version resolution: support `latest` with a hardcoded `FALLBACK_VERSION` as backup.
+
+## Test Conventions
+
+- Tests use `set -e` for fast failure.
+- Assume feature binaries are already installed in `PATH`.
+- Shared helpers in <test/_global/common-utils.sh> provide `check` and `reportResults` functions.
+- Extra scenarios go in `test/<feature>/scenarios.json` with a companion `<scenario>.sh` script.
+
+## Adding a New Feature
+
+1. Create `src/<feature>/devcontainer-feature.json` (mirror existing schema, set `id`, `version`, `options`).
+2. Write `src/<feature>/install.sh` consuming options via uppercase env vars.
+3. Add `test/<feature>/test.sh` with sanity checks.
+4. Update <README.md> with a usage snippet.
+5. Bump the `version` field to publish a new tag.
+
+## Publishing
+
+Each feature is semvered in its `devcontainer-feature.json`; images publish to `ghcr.io/proxayfox/devcontainer-features/<feature>:<major>`. Keep metadata version in sync with published tags.
+
+## Dev Environment
+
+The repo's own dev container (<.devcontainer/devcontainer.json>) uses Node 24 + Docker-in-Docker + GitHub CLI. The `@devcontainers/cli` package is installed globally on container create.

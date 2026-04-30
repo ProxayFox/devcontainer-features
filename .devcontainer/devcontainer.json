@@ -30,7 +30,10 @@
                 "mads-hartmann.bash-ide-vscode",
                 "ms-azuretools.vscode-containers",
                 "DavidAnson.vscode-markdownlint",
-                "tehnix.vscode-tidymarkdown"
+                "tehnix.vscode-tidymarkdown",
+                // Git/GitHub Extensions
+				"GitHub.vscode-pull-request-github", // GitHub PR Extension
+				"GitHub.vscode-github-actions" // GitHub Actions
             ]
         }
     }

@@ -3,7 +3,7 @@
 set -e
 
 # Get version from options (default to latest stable)
-VERSION="${VERSION:-"0.24.2"}"
+VERSION="${VERSION:-"0.25.2"}"
 
 echo "Installing lazydocker version ${VERSION}..."
 

@@ -1,0 +1,112 @@
+name: Check Lazydocker Version
+
+on:
+  schedule:
+    # Run weekly on Mondays at 9:30 UTC
+    - cron: '30 9 * * 1'
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Fetch latest lazydocker release version
+        id: upstream
+        run: |
+          # Use GitHub API to get the latest release tag
+          LATEST_TAG=$(curl -fsSL "https://api.github.com/repos/jesseduffield/lazydocker/releases/latest" | grep -oP '"tag_name":\s*"\Kv?[^"]+')
+
+          if [ -z "$LATEST_TAG" ]; then
+            echo "Error: Could not fetch latest release from GitHub"
+            exit 1
+          fi
+
+          # Strip leading 'v' if present
+          UPSTREAM_VERSION="${LATEST_TAG#v}"
+
+          echo "upstream_version=$UPSTREAM_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Found upstream version: $UPSTREAM_VERSION"
+
+      - name: Get current pinned version
+        id: current
+        run: |
+          # Extract the default version from devcontainer-feature.json
+          CURRENT_VERSION=$(grep -oP '"default":\s*"\K[^"]+' src/lazydocker/devcontainer-feature.json | head -1)
+
+          if [ -z "$CURRENT_VERSION" ]; then
+            echo "Error: Could not extract default version from devcontainer-feature.json"
+            exit 1
+          fi
+
+          echo "current_version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Current pinned version: $CURRENT_VERSION"
+
+      - name: Compare versions
+        id: compare
+        run: |
+          UPSTREAM="${{ steps.upstream.outputs.upstream_version }}"
+          CURRENT="${{ steps.current.outputs.current_version }}"
+
+          if [ "$UPSTREAM" = "$CURRENT" ]; then
+            echo "Versions match ($CURRENT), no update needed"
+            echo "needs_update=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Version mismatch: upstream=$UPSTREAM, current=$CURRENT"
+            echo "needs_update=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update version in devcontainer-feature.json
+        if: steps.compare.outputs.needs_update == 'true'
+        run: |
+          UPSTREAM="${{ steps.upstream.outputs.upstream_version }}"
+          CURRENT="${{ steps.current.outputs.current_version }}"
+
+          # Update default version in devcontainer-feature.json
+          sed -i "s/\"default\": \"${CURRENT}\"/\"default\": \"${UPSTREAM}\"/" src/lazydocker/devcontainer-feature.json
+
+          echo "Updated devcontainer-feature.json default from $CURRENT to $UPSTREAM"
+
+      - name: Update version in install.sh
+        if: steps.compare.outputs.needs_update == 'true'
+        run: |
+          UPSTREAM="${{ steps.upstream.outputs.upstream_version }}"
+          CURRENT="${{ steps.current.outputs.current_version }}"
+
+          # Update fallback VERSION in install.sh
+          sed -i "s/VERSION=\"\${VERSION:-\"${CURRENT}\"}\"/VERSION=\"\${VERSION:-\"${UPSTREAM}\"}\"/" src/lazydocker/install.sh
+
+          echo "Updated install.sh fallback from $CURRENT to $UPSTREAM"
+
+      - name: Create Pull Request
+        if: steps.compare.outputs.needs_update == 'true'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(lazydocker): update default version to ${{ steps.upstream.outputs.upstream_version }}"
+          title: "chore(lazydocker): update default version to ${{ steps.upstream.outputs.upstream_version }}"
+          body: |
+            ## Automated Version Update
+
+            This PR updates the lazydocker default version from `${{ steps.current.outputs.current_version }}` to `${{ steps.upstream.outputs.upstream_version }}`.
+
+            ### Source
+            Version fetched from [jesseduffield/lazydocker releases](https://github.com/jesseduffield/lazydocker/releases/latest).
+
+            ### Notes
+            - Users with explicit version pins in their devcontainer config are unaffected
+            - The default version is used when no version option is specified
+
+            ---
+            *This PR was automatically created by the [lazydocker-version-check](.github/workflows/lazydocker-version-check.yml) workflow.*
+          branch: chore/lazydocker-version-update
+          delete-branch: true
+          labels: |
+            dependencies
+            automated

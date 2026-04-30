@@ -6,7 +6,7 @@
     "options": {
         "version": {
             "type": "string",
-            "default": "0.24.2",
+            "default": "0.25.2",
             "description": "Version of lazydocker to install"
         }
     },

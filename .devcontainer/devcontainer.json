@@ -27,7 +27,10 @@
                 ]
             },
             "extensions": [
-                "mads-hartmann.bash-ide-vscode"
+                "mads-hartmann.bash-ide-vscode",
+                "ms-azuretools.vscode-containers",
+                "DavidAnson.vscode-markdownlint",
+                "tehnix.vscode-tidymarkdown"
             ]
         }
     }

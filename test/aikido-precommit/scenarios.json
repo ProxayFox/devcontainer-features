@@ -1,0 +1,11 @@
+{
+    "pinned-version": {
+        "image": "ubuntu:focal",
+        "features": {
+            "aikido-precommit": {
+                "version": "v1.0.100",
+                "setupGlobalHooks": true
+            }
+        }
+    }
+}

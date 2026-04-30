@@ -11,6 +11,7 @@ This repository contains a collection of dev container Features designed to stre
 Installs the ClickHouse Local CLI, enabling you to run SQL queries on local files without setting up a full ClickHouse server. Perfect for data analysis, ETL development, and testing.
 
 **Features:**
+
 - Run SQL queries on CSV, TSV, JSON, Parquet, and other file formats
 - No server setup required - works entirely locally
 - Multiple installation methods (quick binary install or APT package manager)
@@ -31,6 +32,7 @@ Installs the ClickHouse Local CLI, enabling you to run SQL queries on local file
 ```
 
 **Options:**
+
 - `version` (string): ClickHouse version to install. Default: `"latest"`
 - `installMethod` (string): Installation method - `"quick"` (binary) or `"apt"` (package manager). Default: `"quick"`
 
@@ -44,24 +46,99 @@ $ clickhouse-local --query "SELECT * FROM file('data.csv', 'CSV') LIMIT 10"
 $ clickhouse-local --query "SELECT user_id, COUNT(*) as visits FROM file('logs.json', 'JSONEachRow') GROUP BY user_id"
 ```
 
+### `lazydocker`
+
+Provides the Lazydocker TUI for managing Docker containers and docker-compose workloads from the terminal.
+
+**Features:**
+
+- Single-pane view of containers, images, volumes, and compose services
+- Interactive logs and shell access
+- Lightweight install with configurable version
+
+**Usage:**
+
+```jsonc
+{
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+        "ghcr.io/proxayfox/devcontainer-features/lazydocker:1": {
+            "version": "0.24.2"
+        }
+    }
+}
+```
+
+**Options:**
+
+- `version` (string): Lazydocker version to install. Default: `"0.24.2"`
+
+### `aikido-precommit`
+
+Installs [AikidoSec's pre-commit hook](https://github.com/AikidoSec/pre-commit) for scanning secrets, passwords, and API keys before commits. Prevents accidentally committing sensitive information to repositories.
+
+**Features:**
+
+- Scans staged files for secrets, API keys, passwords, and sensitive data
+- Runs automatically on `git commit` when global hooks are configured
+- Supports Linux (x86_64, ARM64) and macOS (ARM64)
+- Lightweight binary with no runtime dependencies
+
+**Usage:**
+
+```jsonc
+{
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+        "ghcr.io/proxayfox/devcontainer-features/aikido-precommit:1": {}
+    }
+}
+```
+
+**Options:**
+
+- `version` (string): Version of the aikido-local-scanner to install. Default: `"v1.0.116"`
+- `setupGlobalHooks` (boolean): Configure git global hooks path. Default: `true`
+
+**Example:**
+
+```bash
+# Manual scan of a repository
+$ aikido-local-scanner pre-commit-scan /path/to/repo
+
+# Scan current repository
+$ aikido-local-scanner pre-commit-scan "$(git rev-parse --show-toplevel)"
+```
+
 ## Repository Structure
 
 This repository follows the standard dev container Features layout:
 
-```
+```text
 ├── src
-│   └── clickhouse-local
+│   ├── aikido-precommit
+│   │   ├── devcontainer-feature.json
+│   │   └── install.sh
+│   ├── clickhouse-local
+│   │   ├── devcontainer-feature.json
+│   │   └── install.sh
+│   └── lazydocker
 │       ├── devcontainer-feature.json
 │       └── install.sh
 ├── test
 │   ├── _global
 │   │   └── common-utils.sh
-│   └── clickhouse-local
+│   ├── aikido-precommit
+│   │   └── test.sh
+│   ├── clickhouse-local
+│   │   └── test.sh
+│   └── lazydocker
 │       └── test.sh
 └── README.md
 ```
 
 Each Feature has its own subdirectory under `src/` containing:
+
 - `devcontainer-feature.json` - Feature metadata and option definitions
 - `install.sh` - Installation script executed during container build
 
@@ -114,11 +191,12 @@ Features are individually versioned using semantic versioning (semver) in their 
 
 Features in this repository are automatically published to GitHub Container Registry (GHCR) via GitHub Actions. The workflow is triggered on push to the main branch and publishes each Feature with the namespace:
 
-```
+```text
 ghcr.io/proxayfox/devcontainer-features/<feature-name>:<version>
 ```
 
 For example:
+
 - `ghcr.io/proxayfox/devcontainer-features/clickhouse-local:1`
 
 ### Making Features Public

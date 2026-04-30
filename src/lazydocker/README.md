@@ -15,7 +15,7 @@ A simple terminal UI for both docker and docker-compose
 
 | Options Id | Description | Type | Default Value |
 |-----|-----|-----|-----|
-| version | Version of lazydocker to install | string | 0.24.2 |
+| version | Version of lazydocker to install | string | 0.25.2 |
 
 
 
